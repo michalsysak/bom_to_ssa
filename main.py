@@ -1,5 +1,6 @@
+import tkinter as tk
 import re
-import gui
+from gui import App
 def read_txt_file(path):
     # read from txt to a dictionary
     try:
@@ -53,8 +54,9 @@ Array Offset = 0.000, 30.000
 
 def main():
     #placement_list, fid_list = read_txt_file("indeks_programu.txt")
-    app = gui.App()
-    app.mainloop()
+    root = tk.Tk()
+    app = App(root)
+    root.mainloop()
 
 if __name__ == '__main__':
     main()
