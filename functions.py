@@ -1,8 +1,6 @@
-import tkinter as tk
 import re
-from gui import App
+
 def read_txt_file(path):
-    # read from txt to a dictionary
     try:
         with open(path, 'r') as file:
             header = file.readline().strip().split(',')
@@ -24,7 +22,6 @@ def read_txt_file(path):
         return []
 
 def write_ssa(file_path, placements, fid_list):
-    #add margin
     header = '''[VERSION]
 
 [PCB]
@@ -52,11 +49,5 @@ Array Offset = 0.000, 30.000
     with open(file_path, 'w') as file:
         file.write(header + placements_str)
 
-def main():
-    #placement_list, fid_list = read_txt_file("indeks_programu.txt")
-    root = tk.Tk()
-    app = App(root)
-    root.mainloop()
-
-if __name__ == '__main__':
-    main()
+def unique_components(placements):
+    return list(set(placement["PartName"] for placement in placements))

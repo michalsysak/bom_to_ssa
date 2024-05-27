@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog, ttk
+import functions
+
 class App(tk.Tk):
     def __init__(self, root):
         self.root = root
@@ -8,7 +10,9 @@ class App(tk.Tk):
         # Variables
         self.file_path = tk.StringVar()
         self.pcb_margin = tk.DoubleVar()
-        self.select_option = tk.StringVar(value="Option 1")
+        self.select_diode = tk.StringVar(value="")
+        self.select_fid1 = tk.StringVar(value="")
+        self.select_fid2 = tk.StringVar(value="")
         self.pcb_size_x = tk.DoubleVar()
         self.pcb_size_y = tk.DoubleVar()
         self.pcb_size_z = tk.DoubleVar()
@@ -17,16 +21,19 @@ class App(tk.Tk):
         self.offset_x = tk.DoubleVar()
         self.offset_y = tk.DoubleVar()
 
+        self.placements_list = []
+        self.fid_list = []
+
         self.create_widgets()
 
     def create_widgets(self):
-        # Header
+        # HEADER
         header_frame = tk.Frame(self.root)
         header_frame.pack(pady=10)
         header_label = tk.Label(header_frame, text="TXT to SSA Converter", font=("Arial", 16))
         header_label.pack()
 
-        # File input section
+        # FILE SECTION
         file_frame = tk.Frame(self.root)
         file_frame.pack(pady=10)
         file_label = tk.Label(file_frame, text="Upload TXT File")
@@ -36,19 +43,32 @@ class App(tk.Tk):
         file_button = tk.Button(file_frame, text="Choose File", command=self.select_file)
         file_button.grid(row=0, column=2, padx=5)
 
-        # PCB Section
+        # PCB SECTION
         pcb_frame = tk.LabelFrame(self.root, text="PCB")
         pcb_frame.pack(pady=10, fill="x", padx=5)
         pcb_margin_label = tk.Label(pcb_frame, text="PCB Margin")
         pcb_margin_label.grid(row=0, column=0, padx=5)
         pcb_margin_entry = tk.Entry(pcb_frame, textvariable=self.pcb_margin)
         pcb_margin_entry.grid(row=0, column=1, padx=5)
-        select_option_label = tk.Label(pcb_frame, text="Select Option")
-        select_option_label.grid(row=1, column=0, padx=5)
-        select_option_menu = ttk.Combobox(pcb_frame, textvariable=self.select_option, values=["Option 1", "Option 2"])
-        select_option_menu.grid(row=1, column=1, padx=5)
 
-        # BOARD Section
+        # fiducials
+        self.select_fid_label1 = tk.Label(pcb_frame, text="Fiducial1")
+        self.select_fid_label1.grid(row=1, column=0, padx=5)
+        self.select_fid_entry1 = ttk.Combobox(pcb_frame, textvariable=self.select_fid1, state='readonly')
+        self.select_fid_entry1.grid(row=1, column=1, padx=5)
+
+        self.select_fid_label2 = tk.Label(pcb_frame, text="Fiducial2")
+        self.select_fid_label2.grid(row=2, column=0, padx=5)
+        self.select_fid_entry2 = ttk.Combobox(pcb_frame, textvariable=self.select_fid2, state='readonly')
+        self.select_fid_entry2.grid(row=2, column=1, padx=5)
+
+        # main diode
+        self.select_diode_label = tk.Label(pcb_frame, text="Main diode")
+        self.select_diode_label.grid(row=3, column=0, padx=5)
+        self.select_diode_menu = ttk.Combobox(pcb_frame, textvariable=self.select_diode, state='readonly')
+        self.select_diode_menu.grid(row=3, column=1, padx=5)
+
+        # BOARD SECTION
         board_frame = tk.LabelFrame(self.root, text="BOARD")
         board_frame.pack(pady=10, fill="x", padx=5)
         pcb_size_frame = tk.LabelFrame(board_frame, text="PCB Size (mm)")
@@ -88,7 +108,6 @@ class App(tk.Tk):
         offset_y_entry = tk.Entry(array_offset_frame, textvariable=self.offset_y)
         offset_y_entry.grid(row=1, column=1, padx=5)
 
-        # Generate Section
         generate_frame = tk.Frame(self.root)
         generate_frame.pack(pady=10)
         generate_button = tk.Button(generate_frame, text="Generate Files", command=self.generate_files)
@@ -98,7 +117,20 @@ class App(tk.Tk):
         self.progress.pack(pady=10)
 
     def select_file(self):
-        self.file_path.set(filedialog.askopenfilename(filetypes=[("Text files", "*.txt")]))
+        self.file_path.set(filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])) #open file
+        self.placements_list, self.fid_list = functions.read_txt_file(self.file_path.get()) #get placement list and fid list
+        unique_components = functions.unique_components(self.placements_list) #get unique components
+        self.select_diode_menu['values'] = unique_components #assign to the ui
+
+        if unique_components:
+            self.select_diode.set(unique_components[0])
+
+        if self.fid_list:
+            fid_values = [f"{fid['Ref']}: X: {fid['PlacementCentreX']} Y: {fid['PlacementCentreY']}" for fid in self.fid_list]
+            self.select_fid_entry1['values'] = fid_values
+            self.select_fid_entry2['values'] = fid_values
+            self.select_fid1.set(fid_values[0])
+            self.select_fid2.set(fid_values[0])
 
     def generate_files(self):
         self.progress['value'] = 0
@@ -108,7 +140,6 @@ class App(tk.Tk):
             self.root.update_idletasks()
             self.root.after(500)
 
-# Run the application
 if __name__ == "__main__":
     root = tk.Tk()
     app = App(root)
