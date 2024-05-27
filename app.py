@@ -30,7 +30,7 @@ class App(tk.Tk):
         # HEADER
         header_frame = tk.Frame(self.root)
         header_frame.pack(pady=10)
-        header_label = tk.Label(header_frame, text="TXT to SSA Converter", font=("Arial", 16))
+        header_label = tk.Label(header_frame, text="BOM to SSA Converter", font=("Arial", 16))
         header_label.pack()
 
         # FILE SECTION
@@ -52,12 +52,12 @@ class App(tk.Tk):
         pcb_margin_entry.grid(row=0, column=1, padx=5)
 
         # fiducials
-        self.select_fid_label1 = tk.Label(pcb_frame, text="Fiducial1")
+        self.select_fid_label1 = tk.Label(pcb_frame, text="Fiducial1 ")
         self.select_fid_label1.grid(row=1, column=0, padx=5)
         self.select_fid_entry1 = ttk.Combobox(pcb_frame, textvariable=self.select_fid1, state='readonly')
         self.select_fid_entry1.grid(row=1, column=1, padx=5)
 
-        self.select_fid_label2 = tk.Label(pcb_frame, text="Fiducial2")
+        self.select_fid_label2 = tk.Label(pcb_frame, text="Fiducial2 ")
         self.select_fid_label2.grid(row=2, column=0, padx=5)
         self.select_fid_entry2 = ttk.Combobox(pcb_frame, textvariable=self.select_fid2, state='readonly')
         self.select_fid_entry2.grid(row=2, column=1, padx=5)
