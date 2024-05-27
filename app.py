@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog, ttk
 import functions
+import os
 
 class App(tk.Tk):
     def __init__(self, root):
@@ -23,6 +24,7 @@ class App(tk.Tk):
 
         self.placements_list = []
         self.fid_list = []
+        self.components_list = []
 
         self.create_widgets()
 
@@ -46,7 +48,7 @@ class App(tk.Tk):
         # PCB SECTION
         pcb_frame = tk.LabelFrame(self.root, text="PCB")
         pcb_frame.pack(pady=10, fill="x", padx=5)
-        pcb_margin_label = tk.Label(pcb_frame, text="PCB Margin")
+        pcb_margin_label = tk.Label(pcb_frame, text="PCB Margin(mm)")
         pcb_margin_label.grid(row=0, column=0, padx=5)
         pcb_margin_entry = tk.Entry(pcb_frame, textvariable=self.pcb_margin)
         pcb_margin_entry.grid(row=0, column=1, padx=5)
@@ -86,6 +88,7 @@ class App(tk.Tk):
         pcb_size_z_entry = tk.Entry(pcb_size_frame, textvariable=self.pcb_size_z)
         pcb_size_z_entry.grid(row=2, column=1, padx=5)
 
+        #Array widgets
         array_frame = tk.LabelFrame(board_frame, text="Array Configuration")
         array_frame.pack(pady=5, fill="x", padx=5)
         array_columns_label = tk.Label(array_frame, text="Columns")
@@ -108,11 +111,13 @@ class App(tk.Tk):
         offset_y_entry = tk.Entry(array_offset_frame, textvariable=self.offset_y)
         offset_y_entry.grid(row=1, column=1, padx=5)
 
+        #generate button widget
         generate_frame = tk.Frame(self.root)
         generate_frame.pack(pady=10)
         generate_button = tk.Button(generate_frame, text="Generate Files", command=self.generate_files)
         generate_button.pack()
 
+        #Progress bar widget
         self.progress = ttk.Progressbar(generate_frame, orient="horizontal", length=300, mode="determinate")
         self.progress.pack(pady=10)
 
@@ -133,6 +138,15 @@ class App(tk.Tk):
             self.select_fid2.set(fid_values[0])
 
     def generate_files(self):
+        #get the path for the new files
+        file1_path = os.path.splitext(self.file_path.get())[0] + "_M1.ssa"
+        file2_path = os.path.splitext(self.file_path.get())[0] + "_M2.ssa"
+
+        file1_placements, file2_placements = functions.split_placements(self.placements_list, self.select_diode.get())
+
+        functions.write_ssa(file1_path, file1_placements)
+        functions.write_ssa(file2_path, file2_placements)
+
         self.progress['value'] = 0
         self.root.update_idletasks()
         for i in range(5):

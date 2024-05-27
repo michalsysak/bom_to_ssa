@@ -21,14 +21,14 @@ def read_txt_file(path):
         print("No such file or directory")
         return []
 
-def write_ssa(file_path, placements, fid_list):
-    header = '''[VERSION]
+def write_ssa(file_path, placements):
+    header = f'''[VERSION]
 
 [PCB]
 Unit System = MILIMETER
 Coordinate = LOWER LEFT
 Rotation = 0
-Placement Origin = -560.000, 5.000
+Placement Origin = -560.000, 5.000 
 Fiducial = CIRCLE, 8.062, -0.839, 544.970, 302.071
 Accept Mark = NONE, 0, 0
 Bad Mark = NONE, 0, 0
@@ -51,3 +51,22 @@ Array Offset = 0.000, 30.000
 
 def unique_components(placements):
     return list(set(placement["PartName"] for placement in placements))
+
+def split_placements(placements, main_diode):
+
+    #keep track of the placement times
+    time_m1 = 0
+    time_m2 = 0
+
+    max_time_diff = 10
+    placements_m1 = []
+    placements_m2 = []
+
+    #add not main diode components into m2
+    for placement in placements:
+        if placement["PartName"] not in main_diode:
+            time_m2 += 0.165
+            placements_m2.append(placement)
+        #calculating distance between 2 points
+
+    return placements_m1, placements_m2
