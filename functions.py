@@ -1,5 +1,6 @@
 import re
 import math
+from tkinter import DoubleVar
 def read_txt_file(path):
     try:
         with open(path, 'r') as file:
@@ -63,38 +64,67 @@ def find_closest_to_00(placements):
         if distance < min_distance:
             min_distance = distance
             closest_placement = placement["Ref"]
-
     return closest_placement
 
-def split_placements(placements, main_diode):
+def split_placements(placements, main_diode, size_x):
 
-    #keep track of the placement times
+    # Convert size_x to float if it is of type DoubleVar
+    if isinstance(size_x, DoubleVar):
+        size_x = size_x.get()
+    else:
+        size_x = float(size_x)
+
+    # Keep track of the placement times
     time_m1 = 0
     time_m2 = 0
-    max_time_diff = 10
+    min_time_diff = 10
     placements_m1 = []
     placements_m2 = []
 
-    #add none main diode components into m2
+    # Add non-main diode components into m2
     placements_to_keep = []
     for placement in placements:
         if placement["PartName"] not in main_diode:
             time_m2 += 0.165
             placements_m2.append(placement)
+        else:
             placements_to_keep.append(placement)
 
-    # add the closest diode to placements_m1
+    # Add the closest diode to placements_m1
     closest_00 = find_closest_to_00(placements_to_keep)
     for placement in placements_to_keep:
         if placement["Ref"] == closest_00:
             placements_m1.append(placement)
-            time_m1 += 0.165
+            time_m1 += 0.160
+            placements_to_keep.remove(placement)
             break
 
+    # Assign the rest of the diode components
+    while placements_to_keep:
+        placement = placements_to_keep.pop(0)
+        x = float(placement["PlacementCentreX"])
+        if abs(time_m1 - time_m2) < min_time_diff:
+            if time_m1 < time_m2:
+                if x <= size_x / 2:
+                    placements_m1.append(placement)
+                    time_m1 += 0.160
+                else:
+                    placements_m2.append(placement)
+                    time_m2 += 0.165
+            else:
+                if x > size_x / 2:
+                    placements_m2.append(placement)
+                    time_m2 += 0.165
+                else:
+                    placements_m1.append(placement)
+                    time_m1 += 0.160
+        else:
+            if time_m1 < time_m2:
+                placements_m2.append(placement)
+                time_m2 += 0.165
+            else:
+                placements_m1.append(placement)
+                time_m1 += 0.160
 
-    #assign the rest of diode components
-
-    #print(placements_m1, end="\n")
-    #print(placements_m2, end="\n")
-
+    print(f"Times: (M1:{time_m1})(M2: {time_m2})")
     return placements_m1, placements_m2

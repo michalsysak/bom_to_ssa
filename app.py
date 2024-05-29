@@ -122,27 +122,29 @@ class App(tk.Tk):
         self.progress.pack(pady=10)
 
     def select_file(self):
-        self.file_path.set(filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])) #open file
-        self.placements_list, self.fid_list = functions.read_txt_file(self.file_path.get()) #get placement list and fid list
-        unique_components = functions.unique_components(self.placements_list) #get unique components
-        self.select_diode_menu['values'] = unique_components #assign to the ui
+        try:
+            self.file_path.set(filedialog.askopenfilename(filetypes=[("Text files", "*.txt")])) #open file
+            self.placements_list, self.fid_list = functions.read_txt_file(self.file_path.get()) #get placement list and fid list
+            unique_components = functions.unique_components(self.placements_list) #get unique components
+            self.select_diode_menu['values'] = unique_components #assign to the ui
 
-        if unique_components:
-            self.select_diode.set(unique_components[0])
+            if unique_components:
+                self.select_diode.set(unique_components[0])
 
-        if self.fid_list:
-            fid_values = [f"{fid['Ref']}: X: {fid['PlacementCentreX']} Y: {fid['PlacementCentreY']}" for fid in self.fid_list]
-            self.select_fid_entry1['values'] = fid_values
-            self.select_fid_entry2['values'] = fid_values
-            self.select_fid1.set(fid_values[0])
-            self.select_fid2.set(fid_values[0])
-
+            if self.fid_list:
+                fid_values = [f"{fid['Ref']}: X: {fid['PlacementCentreX']} Y: {fid['PlacementCentreY']}" for fid in self.fid_list]
+                self.select_fid_entry1['values'] = fid_values
+                self.select_fid_entry2['values'] = fid_values
+                self.select_fid1.set(fid_values[0])
+                self.select_fid2.set(fid_values[0])
+        except Exception as e:
+            print(f"Error: {e}")
     def generate_files(self):
         #get the path for the new files
         file1_path = os.path.splitext(self.file_path.get())[0] + "_M1.ssa"
         file2_path = os.path.splitext(self.file_path.get())[0] + "_M2.ssa"
 
-        file1_placements, file2_placements = functions.split_placements(self.placements_list, self.select_diode.get())
+        file1_placements, file2_placements = functions.split_placements(self.placements_list, self.select_diode.get(), self.pcb_size_x)
 
         functions.write_ssa(file1_path, file1_placements)
         functions.write_ssa(file2_path, file2_placements)
@@ -153,6 +155,8 @@ class App(tk.Tk):
             self.progress['value'] += 20
             self.root.update_idletasks()
             self.root.after(500)
+
+        return
 
 if __name__ == "__main__":
     root = tk.Tk()
