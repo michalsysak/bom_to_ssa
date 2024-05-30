@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import filedialog, ttk
 import functions
 import os
+import re
 
 class App(tk.Tk):
     def __init__(self, root):
@@ -19,8 +20,8 @@ class App(tk.Tk):
         self.pcb_size_z = tk.DoubleVar()
         self.array_columns = tk.IntVar()
         self.array_rows = tk.IntVar()
-        self.offset_x = tk.DoubleVar()
-        self.offset_y = tk.DoubleVar()
+        self.array_offset_x = tk.DoubleVar()
+        self.array_offset_y = tk.DoubleVar()
 
         self.placements_list = []
         self.fid_list = []
@@ -104,11 +105,11 @@ class App(tk.Tk):
         array_offset_frame.pack(pady=5, fill="x", padx=5)
         offset_x_label = tk.Label(array_offset_frame, text="Offset X")
         offset_x_label.grid(row=0, column=0, padx=5)
-        offset_x_entry = tk.Entry(array_offset_frame, textvariable=self.offset_x)
+        offset_x_entry = tk.Entry(array_offset_frame, textvariable=self.array_offset_x)
         offset_x_entry.grid(row=0, column=1, padx=5)
         offset_y_label = tk.Label(array_offset_frame, text="Offset Y")
         offset_y_label.grid(row=1, column=0, padx=5)
-        offset_y_entry = tk.Entry(array_offset_frame, textvariable=self.offset_y)
+        offset_y_entry = tk.Entry(array_offset_frame, textvariable=self.array_offset_y)
         offset_y_entry.grid(row=1, column=1, padx=5)
 
         #generate button widget
@@ -132,30 +133,56 @@ class App(tk.Tk):
                 self.select_diode.set(unique_components[0])
 
             if self.fid_list:
-                fid_values = [f"{fid['Ref']}: X: {fid['PlacementCentreX']} Y: {fid['PlacementCentreY']}" for fid in self.fid_list]
+                fid_values = [f"{fid['Ref']} X:{fid['PlacementCentreX']} Y:{fid['PlacementCentreY']}" for fid in self.fid_list]
                 self.select_fid_entry1['values'] = fid_values
                 self.select_fid_entry2['values'] = fid_values
                 self.select_fid1.set(fid_values[0])
-                self.select_fid2.set(fid_values[0])
+                self.select_fid2.set(fid_values[1])
         except Exception as e:
             print(f"Error: {e}")
+
     def generate_files(self):
-        #get the path for the new files
-        file1_path = os.path.splitext(self.file_path.get())[0] + "_M1.ssa"
-        file2_path = os.path.splitext(self.file_path.get())[0] + "_M2.ssa"
-
-        file1_placements, file2_placements = functions.split_placements(self.placements_list, self.select_diode.get())
-
-        functions.write_ssa(file1_path, file1_placements)
-        functions.write_ssa(file2_path, file2_placements)
-
-        #progress bar(TODO)
+        # Initialize the progress bar
         self.progress['value'] = 0
         self.root.update_idletasks()
-        for i in range(5):
-            self.progress['value'] += 20
-            self.root.update_idletasks()
-            self.root.after(500)
+
+        # Step 1: Get the path for the new files
+        file1_path = os.path.splitext(self.file_path.get())[0] + "_M1.ssa"
+        file2_path = os.path.splitext(self.file_path.get())[0] + "_M2.ssa"
+        self.progress['value'] += 10
+        self.root.update_idletasks()
+
+        # Step 2: Get placements for the files
+        file1_placements, file2_placements = functions.split_placements(self.placements_list, self.select_diode.get())
+        self.progress['value'] += 20
+        self.root.update_idletasks()
+
+        # Step 3: Get the rest of variables for the file
+        pcb = {'x': self.pcb_size_x.get(), 'y': self.pcb_size_y.get(), 'z': self.pcb_size_z.get(),
+               'margin': self.pcb_margin.get()}
+        fid1 = re.sub(r'[XY]:', '', self.select_fid1.get()[4:]).split(' ')
+        fid2 = re.sub(r'[XY]:', '', self.select_fid2.get()[4:]).split(' ')
+        fiducials = [
+            {'name': self.select_fid1.get()[:4], 'x': fid1[1], 'y': fid1[2]},
+            {'name': self.select_fid2.get()[:4], 'x': fid2[1], 'y': fid2[2]}
+        ]
+        self.progress['value'] += 20
+        self.root.update_idletasks()
+
+        # Step 4: Get the Array configuration
+        array = {'columns': self.array_columns.get(), 'rows': self.array_rows.get(),
+                 'offsetX': self.array_offset_x.get(), 'offsetY': self.array_offset_y.get()}
+        self.progress['value'] += 10
+        self.root.update_idletasks()
+
+        # Step 5: Write data to files M1, M2
+        functions.write_ssa(file1_path, file1_placements, pcb, fiducials, array)
+        self.progress['value'] += 20
+        self.root.update_idletasks()
+        functions.write_ssa(file2_path, file2_placements, pcb, fiducials, array)
+        self.progress['value'] += 20
+        self.root.update_idletasks()
+
         return
 
 if __name__ == "__main__":

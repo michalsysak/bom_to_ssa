@@ -1,6 +1,6 @@
 import re
 import math
-from tkinter import DoubleVar
+import os
 def read_txt_file(path):
     try:
         with open(path, 'r') as file:
@@ -22,27 +22,27 @@ def read_txt_file(path):
         print("No such file or directory")
         return []
 
-def write_ssa(file_path, placements):
+def write_ssa(file_path, placements, pcb, fiducials, array):
+
     header = f'''[VERSION]
 
 [PCB]
 Unit System = MILIMETER
 Coordinate = LOWER LEFT
 Rotation = 0
-Placement Origin = -560.000, 5.000 
-Fiducial = CIRCLE, 8.062, -0.839, 544.970, 302.071
+Placement Origin = -{pcb['x']}, {pcb['margin']} 
+Fiducial = CIRCLE, {fiducials[0]['x']}, {fiducials[0]['y']}, {fiducials[1]['x']}, {fiducials[1]['y']}
 Accept Mark = NONE, 0, 0
 Bad Mark = NONE, 0, 0
 
 [BOARD]
-Board Name = 
-PCB Size = 560.000, 310.400, 3.000
-Array = 1, 10, LOWER RIGHT
-Array Offset = 0.000, 30.000
+Board Name = {os.path.splitext(os.path.basename(file_path))[0]}
+PCB Size = {pcb['x']}, {pcb['y']+0.4}, 3.000
+Array = {array['columns']}, {array['rows']}, LOWER RIGHT
+Array Offset = {array['offsetX']}, {array['offsetY']}
 
 [PLACEMENTS]
 '''
-
     placements_str = ''
     for placement in placements:
         placements_str += f'"{placement["Ref"]}" {placement["PlacementCentreX"]} {placement["PlacementCentreY"]} 0.000 {placement["Rotation"]} NONE 0 0 0 0 4286 0 "{placement["PartName"]}" "" ""\n'
@@ -105,4 +105,5 @@ def split_placements(placements, main_diode):
             placements_to_keep.pop(-i-1)
             time_m2 += 0.165
 
+    print(time_m1, time_m2)
     return placements_m1, placements_m2
