@@ -53,57 +53,37 @@ Array Offset = {array['offsetX']}, {array['offsetY']}
 def unique_components(placements):
     return list(set(placement["PartName"] for placement in placements))
 
-def find_closest_to_00(placements):
-    min_distance = float('inf')
-    closest_placement = None
-
-    for placement in placements:
-        x = float(placement["PlacementCentreX"])
-        y = float(placement["PlacementCentreY"])
-        distance = math.sqrt(x ** 2 + y ** 2)
-        if distance < min_distance:
-            min_distance = distance
-            closest_placement = placement["Ref"]
-    return closest_placement
-
-def split_placements(placements, main_diode):
+def split_placements(placements, main_diode, array_number):
 
     # Keep track of the placement times
     time_m1 = 0
     time_m2 = 0
-    min_time_diff = 10
     placements_m1 = []
     placements_m2 = []
+
+    #time diff value to change if you want different time diffs
+    min_time_diff = 8
 
     # Add non-main diode components into m2
     placements_to_keep = []
     for placement in placements:
         if placement["PartName"] not in main_diode:
-            time_m2 += 0.165
+            time_m2 += 0.165 * array_number
             placements_m2.append(placement)
         else:
             placements_to_keep.append(placement)
-    """
-    # Add the closest diode to placements_m1
-    closest_00 = find_closest_to_00(placements_to_keep)
-    for placement in placements_to_keep:
-        if placement["Ref"] == closest_00:
-            placements_m1.append(placement)
-            time_m1 += 0.160
-            placements_to_keep.remove(placement)
-            break
-    """
+
     # Assign the rest of the diode components
     i = 0
     while i < len(placements_to_keep):
-        if time_m1 <= time_m2:
+        if time_m1 <= time_m2 + min_time_diff:
             placements_m1.append(placements_to_keep[i])
             placements_to_keep.pop(i)
-            time_m1 += 0.160
+            time_m1 += 0.160 * array_number
         else:
             placements_m2.append(placements_to_keep[-i-1])
             placements_to_keep.pop(-i-1)
-            time_m2 += 0.165
+            time_m2 += 0.165 * array_number
 
     print(time_m1, time_m2)
     return placements_m1, placements_m2

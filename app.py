@@ -153,7 +153,10 @@ class App(tk.Tk):
         self.root.update_idletasks()
 
         # Step 2: Get placements for the files
-        file1_placements, file2_placements = functions.split_placements(self.placements_list, self.select_diode.get())
+        array_number = self.array_rows.get() * self.array_columns.get()
+        #todo
+        #check the value (array cant be 0x0 size)
+        file1_placements, file2_placements = functions.split_placements(self.placements_list, self.select_diode.get(), array_number)
         self.progress['value'] += 20
         self.root.update_idletasks()
 
