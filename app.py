@@ -1,8 +1,9 @@
 import customtkinter as ctk
-from tkinter import filedialog
+from tkinter import filedialog, messagebox  # Import messagebox
 import functions
 import os
 import re
+import threading
 
 class App(ctk.CTk):
     def __init__(self, root):
@@ -127,6 +128,7 @@ class App(ctk.CTk):
         # Progress bar widget
         self.progress = ctk.CTkProgressBar(generate_frame, orientation="horizontal", width=350, height=10, mode="determinate")
         self.progress.pack(padx=10,pady=10)
+        self.progress.set(0)
 
     def select_file(self):
         try:
@@ -148,41 +150,43 @@ class App(ctk.CTk):
             print(f"Error: {e}")
 
     def validate_input(self):
-        try:
-            if not self.file_path.get():
-                raise ValueError("File path is empty")
+        errors = []
 
-            if self.pcb_margin.get() == 0.0:
-                self.pcb_margin.set(0.1)
-                print("Warning: PCB margin set to default value 0.1")
+        if not self.file_path.get():
+            errors.append("File path is empty")
 
-            if self.pcb_size_x.get() == 0.0:
-                self.pcb_size_x.set(1.0)
-                print("Warning: PCB X size set to default value 1.0")
-            if self.pcb_size_y.get() == 0.0:
-                self.pcb_size_y.set(1.0)
-                print("Warning: PCB Y size set to default value 1.0")
-            if self.pcb_size_z.get() == 0.0:
-                self.pcb_size_z.set(1.0)
-                print("Warning: PCB Z size set to default value 1.0")
+        if self.pcb_margin.get() <= 0.0:
+            self.pcb_margin.set(0)
+            errors.append("PCB margin set to default value 0")
 
-            if self.array_columns.get() <= 0:
-                self.array_columns.set(1)
-                print("Warning: Array columns set to default value 1")
+        if self.pcb_size_x.get() <= 0.0:
+            self.pcb_size_x.set(0)
+            errors.append("PCB X size set to default value 0")
+        if self.pcb_size_y.get() <= 0.0:
+            self.pcb_size_y.set(0)
+            errors.append("PCB Y size set to default value 0")
+        if self.pcb_size_z.get() <= 0.0:
+            self.pcb_size_z.set(0)
+            errors.append("PCB Z size set to default value 0")
 
-            if self.array_rows.get() <= 0:
-                self.array_rows.set(1)
-                print("Warning: Array rows set to default value 1")
+        if self.array_columns.get() <= 0:
+            self.array_columns.set(1)
+            errors.append("Array columns set to default value 1")
 
-            if self.array_offset_x.get() == 0.0:
-                self.array_offset_x.set(0.1)
-                print("Warning: Array offset X set to default value 0.1")
-            if self.array_offset_y.get() == 0.0:
-                self.array_offset_y.set(0.1)
-                print("Warning: Array offset Y set to default value 0.1")
+        if self.array_rows.get() <= 0:
+            self.array_rows.set(1)
+            errors.append("Array rows set to default value 1")
 
-        except ValueError as ve:
-            print(f"Validation Error: {ve}")
+        if self.array_offset_x.get() <= 0.0:
+            self.array_offset_x.set(0)
+            errors.append("Array offset X set to default value 0")
+        if self.array_offset_y.get() <= 0.0:
+            self.array_offset_y.set(0)
+            errors.append("Array offset Y set to default value 0")
+
+        # Display all errors in one pop-up if there are any
+        if errors:
+            messagebox.showerror("Validation Errors", "\n".join(errors))
             return False
 
         return True
@@ -206,53 +210,69 @@ class App(ctk.CTk):
             return False
 
     def generate_files(self):
-        if not self.validate_input():
-            print("Validation failed, please correct the input fields.")
-            return
+        self._update_progress(0)  # Ensure the progress bar starts at 0
+        thread = threading.Thread(target=self._generate_files_task)
+        thread.start()
 
-        self.progress.set(0)
+    def _generate_files_task(self):
+        try:
+            self._update_progress(0)
+            if not self.validate_input():
+                self._update_status("Validation failed, please correct the input fields.")
+                return
 
-        file1_path = os.path.splitext(self.file_path.get())[0] + "_M1.ssa"
-        file2_path = os.path.splitext(self.file_path.get())[0] + "_M2.ssa"
-        self.progress.set(0.1)
+            self._update_progress(0.1)
 
-        array_number = self.array_rows.get() * self.array_columns.get()
-        file1_placements, file2_placements = functions.split_placements(
-            self.placements_list, self.select_diode.get(), array_number)
-        self.progress.set(0.3)
+            file1_path = os.path.splitext(self.file_path.get())[0] + "_M1.ssa"
+            file2_path = os.path.splitext(self.file_path.get())[0] + "_M2.ssa"
 
-        pcb = {
-            'x': self.pcb_size_x.get(),
-            'y': self.pcb_size_y.get(),
-            'z': self.pcb_size_z.get(),
-            'margin': self.pcb_margin.get()
-        }
-        fid1 = re.sub(r'[XY]:', '', self.select_fid1.get()[4:]).split(' ')
-        fid2 = re.sub(r'[XY]:', '', self.select_fid2.get()[4:]).split(' ')
-        fiducials = [
-            {'name': self.select_fid1.get()[:4], 'x': fid1[1], 'y': fid1[2]},
-            {'name': self.select_fid2.get()[:4], 'x': fid2[1], 'y': fid2[2]}
-        ]
-        self.progress.set(0.5)
+            array_number = self.array_rows.get() * self.array_columns.get()
+            file1_placements, file2_placements = functions.split_placements(
+                self.placements_list, self.select_diode.get(), array_number)
+            self._update_progress(0.3)
 
-        array = {
-            'columns': self.array_columns.get(),
-            'rows': self.array_rows.get(),
-            'offsetX': self.array_offset_x.get(),
-            'offsetY': self.array_offset_y.get()
-        }
-        self.progress.set(0.6)
+            pcb = {
+                'x': self.pcb_size_x.get(),
+                'y': self.pcb_size_y.get(),
+                'z': self.pcb_size_z.get(),
+                'margin': self.pcb_margin.get()
+            }
+            fid1 = re.sub(r'[XY]:', '', self.select_fid1.get()[4:]).split(' ')
+            fid2 = re.sub(r'[XY]:', '', self.select_fid2.get()[4:]).split(' ')
+            fiducials = [
+                {'name': self.select_fid1.get()[:4], 'x': fid1[1], 'y': fid1[2]},
+                {'name': self.select_fid2.get()[:4], 'x': fid2[1], 'y': fid2[2]}
+            ]
+            self._update_progress(0.5)
 
-        functions.write_ssa(file1_path, file1_placements, pcb, fiducials, array)
-        self.progress.set(0.8)
-        functions.write_ssa(file2_path, file2_placements, pcb, fiducials, array)
-        self.progress.set(1.0)
+            array = {
+                'columns': self.array_columns.get(),
+                'rows': self.array_rows.get(),
+                'offsetX': self.array_offset_x.get(),
+                'offsetY': self.array_offset_y.get()
+            }
+            self._update_progress(0.6)
 
-        print("Files Created")
-        return
+            functions.write_ssa(file1_path, file1_placements, pcb, fiducials, array)
+            self._update_progress(0.8)
+            functions.write_ssa(file2_path, file2_placements, pcb, fiducials, array)
+            self._update_progress(1.0)
+
+            self._update_status("Files Created")
+
+        except Exception as e:
+            self._update_status(f"Error: {e}")
+            self._update_progress(0)
+
+    def _update_progress(self, progress):
+        self.root.after(0, lambda: self.progress.set(progress))
+        self.root.after(0, self.root.update_idletasks)
+
+    def _update_status(self, message):
+        print(message)
+        self.root.after(0, self.root.update_idletasks)
 
 if __name__ == "__main__":
     root = ctk.CTk()
-
     app = App(root)
     root.mainloop()
