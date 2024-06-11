@@ -58,24 +58,24 @@ class App(ctk.CTk):
         pcb_frame.pack(pady=10, fill="x", padx=5)
         pcb_margin_label = ctk.CTkLabel(pcb_frame, text="PCB Margin (mm)")
         pcb_margin_label.grid(row=0, column=0, padx=10, pady=(5,2.5))
-        pcb_margin_entry = ctk.CTkEntry(pcb_frame, textvariable=self.pcb_margin, validate="focusout", validatecommand=self.validate_float)
+        pcb_margin_entry = ctk.CTkEntry(pcb_frame, textvariable=self.pcb_margin, validate="focusout", validatecommand=self.validate_float, width=175)
         pcb_margin_entry.grid(row=0, column=1, padx=10, pady=(5,2.5))
 
         # Fiducials
         self.select_fid_label1 = ctk.CTkLabel(pcb_frame, text="Fiducial 1")
         self.select_fid_label1.grid(row=1, column=0, padx=5, pady=2.5)
-        self.select_fid_entry1 = ctk.CTkComboBox(pcb_frame, variable=self.select_fid1, values=[], state='readonly')
+        self.select_fid_entry1 = ctk.CTkComboBox(pcb_frame, variable=self.select_fid1, values=[], state='readonly', width=175)
         self.select_fid_entry1.grid(row=1, column=1, padx=5, pady=2.5)
 
         self.select_fid_label2 = ctk.CTkLabel(pcb_frame, text="Fiducial 2")
         self.select_fid_label2.grid(row=2, column=0, padx=5, pady=2.5)
-        self.select_fid_entry2 = ctk.CTkComboBox(pcb_frame, variable=self.select_fid2, values=[], state='readonly')
+        self.select_fid_entry2 = ctk.CTkComboBox(pcb_frame, variable=self.select_fid2, values=[], state='readonly', width=175)
         self.select_fid_entry2.grid(row=2, column=1, padx=5, pady=2.5)
 
         # Main diode
         self.select_diode_label = ctk.CTkLabel(pcb_frame, text="Main diode")
         self.select_diode_label.grid(row=3, column=0, padx=5, pady=(2.5,5))
-        self.select_diode_menu = ctk.CTkComboBox(pcb_frame, variable=self.select_diode, values=[], state='readonly')
+        self.select_diode_menu = ctk.CTkComboBox(pcb_frame, variable=self.select_diode, values=[], state='readonly', width=175)
         self.select_diode_menu.grid(row=3, column=1, padx=5, pady=(2.5,5))
 
         # BOARD SECTION
@@ -132,6 +132,7 @@ class App(ctk.CTk):
 
     def select_file(self):
         try:
+            self.progress.set(0)
             self.file_path.set(filedialog.askopenfilename(filetypes=[("Text files", "*.txt")]))
             self.placements_list, self.fid_list = functions.read_txt_file(self.file_path.get())
             unique_components = functions.unique_components(self.placements_list)
@@ -157,17 +158,17 @@ class App(ctk.CTk):
 
         if self.pcb_margin.get() <= 0.0:
             self.pcb_margin.set(0)
-            errors.append("PCB margin set to default value 0")
+            errors.append("PCB margin must be greater than 0")
 
         if self.pcb_size_x.get() <= 0.0:
             self.pcb_size_x.set(0)
-            errors.append("PCB X size set to default value 0")
+            errors.append("PCB X size must be greater than 0")
         if self.pcb_size_y.get() <= 0.0:
             self.pcb_size_y.set(0)
-            errors.append("PCB Y size set to default value 0")
+            errors.append("PCB Y size must be greater than 0")
         if self.pcb_size_z.get() <= 0.0:
             self.pcb_size_z.set(0)
-            errors.append("PCB Z size set to default value 0")
+            errors.append("PCB Z size must be greater than 0")
 
         if self.array_columns.get() <= 0:
             self.array_columns.set(1)
@@ -177,18 +178,19 @@ class App(ctk.CTk):
             self.array_rows.set(1)
             errors.append("Array rows set to default value 1")
 
-        if self.array_offset_x.get() <= 0.0:
+        if self.array_offset_x.get() < 0.0:
             self.array_offset_x.set(0)
-            errors.append("Array offset X set to default value 0")
-        if self.array_offset_y.get() <= 0.0:
+            errors.append("Array offset X must be greater than 0")
+        if self.array_offset_y.get() < 0.0:
             self.array_offset_y.set(0)
-            errors.append("Array offset Y set to default value 0")
+            errors.append("Array offset Y must be greater than 0")
 
         # Display all errors in one pop-up if there are any
         if errors:
-            messagebox.showerror("Validation Errors", "\n".join(errors))
+            messagebox.showerror("Input Error", "\n".join(errors))
             return False
 
+        messagebox.showinfo("Files Created", "All Files Created")
         return True
 
     def validate_float(self, value_if_allowed):
@@ -268,8 +270,7 @@ class App(ctk.CTk):
         self.root.after(0, lambda: self.progress.set(progress))
         self.root.after(0, self.root.update_idletasks)
 
-    def _update_status(self, message):
-        print(message)
+    def _update_status(self):
         self.root.after(0, self.root.update_idletasks)
 
 if __name__ == "__main__":
