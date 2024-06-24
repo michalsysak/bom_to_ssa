@@ -93,7 +93,8 @@ class App(ctk.CTk):
 
     def create_fid_section(self):
         # Fiducials
-        self.fid_frame = ctk.CTkFrame(self.root)
+        self.fid_frame = ctk.CTkFrame(self.root, border_width=2, corner_radius=10)
+
         if self.are_fids:
             self.select_fid_label1 = ctk.CTkLabel(self.fid_frame, text="Fiducial 1")
             self.select_fid_label1.grid(row=1, column=0, padx=5, pady=2.5)
@@ -106,9 +107,9 @@ class App(ctk.CTk):
             self.select_fid_entry2 = ctk.CTkComboBox(self.fid_frame, variable=self.select_fid2, values=[],
                                                      state='readonly', width=175)
             self.select_fid_entry2.grid(row=2, column=1, padx=5, pady=2.5)
+
         else:
             ...
-
     def create_board_section(self):
         # BOARD SECTION
         board_frame = ctk.CTkFrame(self.root, border_width=2, corner_radius=10)
