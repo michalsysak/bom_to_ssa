@@ -4,14 +4,14 @@
 Unit System = MILIMETER
 Coordinate = LOWER LEFT
 Rotation = 0
-Placement Origin = -560.0, 5.0 
+Placement Origin = -210.0, 5.0 
 Fiducial = CIRCLE, 8.0, 8.0, 200.0, 200.0
 Accept Mark = NONE, 0, 0
 Bad Mark = NONE, 0, 0
 
 [BOARD]
 Board Name = indeks_programu_M2
-PCB Size = 560.0, 210.4, 3.000
+PCB Size = 210.0, 560.4, 3.000
 Array = 1, 10, LOWER RIGHT
 Array Offset = 0.0, 30.0
 

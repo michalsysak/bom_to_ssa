@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from tkinter import filedialog, messagebox # Import messagebox
+from tkinter import filedialog, messagebox  # Import messagebox
 import functions
 import os
 import re
@@ -14,11 +14,15 @@ class App(ctk.CTk):
 
         # Make the app static and define size
         self.root.resizable(False, False)
-        self.root.geometry("600x700")
+        self.root.geometry("600x800")
         self.initialize_variables()
 
-        #create widgets
+        # Initialize fid_frame to None
+        self.fid_frame = None
+
+        # Create widgets
         self.create_widgets()
+
     def initialize_variables(self):
         # Initialize Variables with Default Values
         self.file_path = ctk.StringVar(value="")
@@ -34,10 +38,10 @@ class App(ctk.CTk):
         self.array_offset_x = ctk.DoubleVar(value=0.0)
         self.array_offset_y = ctk.DoubleVar(value=0.0)
 
-        # states variables
+        # States variables
         self.are_fids = False
 
-        # placement variables
+        # Placement variables
         self.placements_list = []
         self.fid_list = []
         self.components_list = []
@@ -59,14 +63,14 @@ class App(ctk.CTk):
     def create_header(self):
         # HEADER
         header_frame = ctk.CTkFrame(self.root, width=800, height=500)
-        header_frame.pack(pady=10)
+        header_frame.grid(row=0, column=0, pady=10)
         header_label = ctk.CTkLabel(header_frame, text="BOM to SSA Converter", font=("Arial", 16), bg_color="#242424")
         header_label.pack()
 
     def create_file_section(self):
         # FILE SECTION
         file_frame = ctk.CTkFrame(self.root)
-        file_frame.pack(pady=10)
+        file_frame.grid(row=1, column=0, pady=10)
         file_label = ctk.CTkLabel(file_frame, text="Upload TXT File", bg_color="#2b2b2b")
         file_label.grid(row=0, column=0, padx=10, pady=10)
         file_entry = ctk.CTkEntry(file_frame, textvariable=self.file_path, width=300)
@@ -77,11 +81,11 @@ class App(ctk.CTk):
     def create_pcb_section(self):
         # PCB SECTION
         pcb_frame = ctk.CTkFrame(self.root, border_width=2, corner_radius=10)
-        pcb_frame.pack(pady=10, fill="x", padx=5)
+        pcb_frame.grid(row=2, column=0, pady=10, padx=5, sticky="ew")
         pcb_margin_label = ctk.CTkLabel(pcb_frame, text="PCB Margin (mm)")
         pcb_margin_label.grid(row=0, column=0, padx=10, pady=(5, 2.5))
         pcb_margin_entry = ctk.CTkEntry(pcb_frame, textvariable=self.pcb_margin, validate="focusout",
-                                        validatecommand=self.validate_float(self.pcb_margin.get()), width=175)
+                                        validatecommand=(self.root.register(self.validate_float), '%P'), width=175)
         pcb_margin_entry.grid(row=0, column=1, padx=10, pady=(5, 2.5))
 
         # Main diode
@@ -92,78 +96,88 @@ class App(ctk.CTk):
         self.select_diode_menu.grid(row=3, column=1, padx=5, pady=(2.5, 5))
 
     def create_fid_section(self):
-        # Fiducials
+        # Destroy the existing fid_frame if it exists
+        if self.fid_frame is not None:
+            self.fid_frame.destroy()
+
+        # Create a new fid_frame
         self.fid_frame = ctk.CTkFrame(self.root, border_width=2, corner_radius=10)
+        self.fid_frame.grid(row=3, column=0, pady=10, padx=5, sticky="ew")
 
         if self.are_fids:
-            self.select_fid_label1 = ctk.CTkLabel(self.fid_frame, text="Fiducial 1")
-            self.select_fid_label1.grid(row=1, column=0, padx=5, pady=2.5)
-            self.select_fid_entry1 = ctk.CTkComboBox(self.fid_frame, variable=self.select_fid1, values=[],
-                                                     state='readonly', width=175)
-            self.select_fid_entry1.grid(row=1, column=1, padx=5, pady=2.5)
-
-            self.select_fid_label2 = ctk.CTkLabel(self.fid_frame, text="Fiducial 2")
-            self.select_fid_label2.grid(row=2, column=0, padx=5, pady=2.5)
-            self.select_fid_entry2 = ctk.CTkComboBox(self.fid_frame, variable=self.select_fid2, values=[],
-                                                     state='readonly', width=175)
-            self.select_fid_entry2.grid(row=2, column=1, padx=5, pady=2.5)
-
+            self.add_fid_content()
         else:
-            ...
+            no_fid_label = ctk.CTkLabel(self.fid_frame, text="No Fiducials found. Please select manually:")
+            no_fid_label.grid(row=0, column=0, padx=5, pady=2.5)
+
+
+    def add_fid_content(self):
+        self.fid_label = ctk.CTkLabel(self.fid_frame, text="Found fiducials:")
+        self.fid_label.grid(row=0, column=0, padx=5, pady=2.5)
+        self.select_fid_label1 = ctk.CTkLabel(self.fid_frame, text="Fiducial 1")
+        self.select_fid_label1.grid(row=1, column=0, padx=5, pady=2.5)
+        self.select_fid_entry1 = ctk.CTkComboBox(self.fid_frame, variable=self.select_fid1, values=[],
+                                                 state='readonly', width=175)
+        self.select_fid_entry1.grid(row=1, column=1, padx=5, pady=2.5)
+
+        self.select_fid_label2 = ctk.CTkLabel(self.fid_frame, text="Fiducial 2")
+        self.select_fid_label2.grid(row=2, column=0, padx=5, pady=2.5)
+        self.select_fid_entry2 = ctk.CTkComboBox(self.fid_frame, variable=self.select_fid2, values=[],
+                                                 state='readonly', width=175)
+        self.select_fid_entry2.grid(row=2, column=1, padx=5, pady=2.5)
+
     def create_board_section(self):
         # BOARD SECTION
         board_frame = ctk.CTkFrame(self.root, border_width=2, corner_radius=10)
-        board_frame.pack(pady=10, fill="x", padx=5)
-        pcb_size_frame = ctk.CTkFrame(board_frame, border_width=2, corner_radius=10)
-        pcb_size_frame.pack(pady=5, fill="x", padx=5)
-        pcb_size_x_label = ctk.CTkLabel(pcb_size_frame, text="X Size")
+        board_frame.grid(row=4, column=0, pady=10, padx=5, sticky="ew")
+        pcb_size_x_label = ctk.CTkLabel(board_frame, text="X Size")
         pcb_size_x_label.grid(row=0, column=0, padx=10, pady=(5, 2.5))
-        pcb_size_x_entry = ctk.CTkEntry(pcb_size_frame, textvariable=self.pcb_size_x, validate="focusout",
-                                        validatecommand=self.validate_float(self.pcb_size_x.get()))
+        pcb_size_x_entry = ctk.CTkEntry(board_frame, textvariable=self.pcb_size_x, validate="focusout",
+                                        validatecommand=(self.root.register(self.validate_float), '%P'))
         pcb_size_x_entry.grid(row=0, column=1, padx=10, pady=2.5)
-        pcb_size_y_label = ctk.CTkLabel(pcb_size_frame, text="Y Size")
+        pcb_size_y_label = ctk.CTkLabel(board_frame, text="Y Size")
         pcb_size_y_label.grid(row=1, column=0, padx=10, pady=2.5)
-        pcb_size_y_entry = ctk.CTkEntry(pcb_size_frame, textvariable=self.pcb_size_y, validate="focusout",
-                                        validatecommand=self.validate_float(self.pcb_size_y.get()))
+        pcb_size_y_entry = ctk.CTkEntry(board_frame, textvariable=self.pcb_size_y, validate="focusout",
+                                        validatecommand=(self.root.register(self.validate_float), '%P'))
         pcb_size_y_entry.grid(row=1, column=1, padx=10, pady=2.5)
-        pcb_size_z_label = ctk.CTkLabel(pcb_size_frame, text="Z Size")
+        pcb_size_z_label = ctk.CTkLabel(board_frame, text="Z Size")
         pcb_size_z_label.grid(row=2, column=0, padx=10, pady=2.5)
-        pcb_size_z_entry = ctk.CTkEntry(pcb_size_frame, textvariable=self.pcb_size_z, validate="focusout",
-                                        validatecommand=self.validate_float(self.pcb_size_z.get()))
+        pcb_size_z_entry = ctk.CTkEntry(board_frame, textvariable=self.pcb_size_z, validate="focusout",
+                                        validatecommand=(self.root.register(self.validate_float), '%P'))
         pcb_size_z_entry.grid(row=2, column=1, padx=10, pady=(2.5, 5))
 
     def create_array_section(self):
         # Array widgets
         array_frame = ctk.CTkFrame(self.root, border_width=2, corner_radius=10)
-        array_frame.pack(pady=5, fill="x", padx=5)
+        array_frame.grid(row=5, column=0, pady=5, padx=5, sticky="ew")
         array_columns_label = ctk.CTkLabel(array_frame, text="Columns")
         array_columns_label.grid(row=0, column=0, padx=5, pady=2.5)
         array_columns_entry = ctk.CTkEntry(array_frame, textvariable=self.array_columns, validate="focusout",
-                                           validatecommand=self.validate_int(self.array_columns.get()))
+                                           validatecommand=(self.root.register(self.validate_int), '%P'))
         array_columns_entry.grid(row=0, column=1, padx=5, pady=2.5)
         array_rows_label = ctk.CTkLabel(array_frame, text="Rows")
         array_rows_label.grid(row=1, column=0, padx=5, pady=2.5)
         array_rows_entry = ctk.CTkEntry(array_frame, textvariable=self.array_rows, validate="focusout",
-                                        validatecommand=self.validate_int(self.array_rows.get()))
+                                        validatecommand=(self.root.register(self.validate_int), '%P'))
         array_rows_entry.grid(row=1, column=1, padx=5, pady=2.5)
 
         array_offset_frame = ctk.CTkFrame(self.root, border_width=2, corner_radius=10)
-        array_offset_frame.pack(pady=5, fill="x", padx=5)
+        array_offset_frame.grid(row=6, column=0, pady=5, padx=5, sticky="ew")
         offset_x_label = ctk.CTkLabel(array_offset_frame, text="Array Offset X")
         offset_x_label.grid(row=0, column=0, padx=5, pady=2.5)
         offset_x_entry = ctk.CTkEntry(array_offset_frame, textvariable=self.array_offset_x, validate="focusout",
-                                      validatecommand=self.validate_float(self.array_offset_x.get()))
+                                      validatecommand=(self.root.register(self.validate_float), '%P'))
         offset_x_entry.grid(row=0, column=1, padx=5, pady=2.5)
         offset_y_label = ctk.CTkLabel(array_offset_frame, text="Array Offset Y")
         offset_y_label.grid(row=1, column=0, padx=5, pady=2.5)
         offset_y_entry = ctk.CTkEntry(array_offset_frame, textvariable=self.array_offset_y, validate="focusout",
-                                      validatecommand=self.validate_float(self.array_offset_y.get()))
+                                      validatecommand=(self.root.register(self.validate_float), '%P'))
         offset_y_entry.grid(row=1, column=1, padx=5, pady=2.5)
 
     def generate_button_progress(self):
         # Generate button widget
         generate_frame = ctk.CTkFrame(self.root, width=400, height=200)
-        generate_frame.pack(pady=20)
+        generate_frame.grid(row=7, column=0, pady=20)
         generate_button = ctk.CTkButton(generate_frame, text="Generate Files", width=250, command=self.generate_files)
         generate_button.pack(pady=10)
 
@@ -172,6 +186,7 @@ class App(ctk.CTk):
                                            mode="determinate")
         self.progress.pack(padx=10, pady=10)
         self.progress.set(0)
+
     def select_file(self):
         try:
             self.progress.set(0)
@@ -186,16 +201,20 @@ class App(ctk.CTk):
 
             if len(self.fid_list) >= 2:
                 self.are_fids = True
+                self.create_fid_section()  # Update fiducial section dynamically
 
-                #set the fid values
-                fid_values = [f"{fid['Ref']} X:{fid['PlacementCentreX']} Y:{fid['PlacementCentreY']}" for fid in self.fid_list]
+                # Set the fid values
+                fid_values = [f"{fid['Ref']} X:{fid['PlacementCentreX']} Y:{fid['PlacementCentreY']}" for fid in
+                              self.fid_list]
                 self.select_fid_entry1.configure(values=fid_values)
                 self.select_fid_entry2.configure(values=fid_values)
                 self.select_fid1.set(fid_values[0])
                 self.select_fid2.set(fid_values[1])
             else:
                 self.are_fids = False
-                messagebox.showinfo("No Fiducials found ", f"No Fiducials found in {self.file_path.get()}. Please select manually")
+                messagebox.showinfo("No Fiducials found",
+                                    f"No Fiducials found in {self.file_path.get()}. Please select manually")
+                self.create_fid_section()  # Update fiducial section dynamically
         except Exception as e:
             print(f"Error: {e}")
 
@@ -321,8 +340,6 @@ class App(ctk.CTk):
 
     def _update_status(self):
         self.root.after(0, self.root.update_idletasks)
-
-
 
 
 if __name__ == "__main__":
