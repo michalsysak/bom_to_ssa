@@ -40,6 +40,7 @@ class App(ctk.CTk):
 
         # States variables
         self.are_fids = False
+        self.file_selected = False
 
         # Placement variables
         self.placements_list = []
@@ -104,16 +105,20 @@ class App(ctk.CTk):
         self.fid_frame = ctk.CTkFrame(self.root, border_width=2, corner_radius=10)
         self.fid_frame.grid(row=3, column=0, pady=10, padx=5, sticky="ew")
 
-        if self.are_fids:
-            self.add_fid_content()
+        if self.file_selected:
+            if self.are_fids:
+                self.add_fid_content()  # creates combobox for the fids in file
+            else:
+                no_fid_label = ctk.CTkLabel(self.fid_frame, text="No Fiducials found. Please select manually:")
+                no_fid_label.grid(row=0, column=0, padx=5, pady=2.5)
         else:
-            no_fid_label = ctk.CTkLabel(self.fid_frame, text="No Fiducials found. Please select manually:")
+            no_fid_label = ctk.CTkLabel(self.fid_frame, text="No Fiducials found.")
             no_fid_label.grid(row=0, column=0, padx=5, pady=2.5)
-
 
     def add_fid_content(self):
         self.fid_label = ctk.CTkLabel(self.fid_frame, text="Found fiducials:")
         self.fid_label.grid(row=0, column=0, padx=5, pady=2.5)
+
         self.select_fid_label1 = ctk.CTkLabel(self.fid_frame, text="Fiducial 1")
         self.select_fid_label1.grid(row=1, column=0, padx=5, pady=2.5)
         self.select_fid_entry1 = ctk.CTkComboBox(self.fid_frame, variable=self.select_fid1, values=[],
@@ -201,8 +206,17 @@ class App(ctk.CTk):
 
             if len(self.fid_list) >= 2:
                 self.are_fids = True
-                self.create_fid_section()  # Update fiducial section dynamically
+            else:
+                self.are_fids = False
+                messagebox.showinfo("No Fiducials found",
+                                    f"No Fiducials found in {self.file_path.get()}. Please select manually")
 
+            self.file_selected = True
+
+            # Update the fiducial section dynamically after the state variables are set
+            self.create_fid_section()
+
+            if self.are_fids:
                 # Set the fid values
                 fid_values = [f"{fid['Ref']} X:{fid['PlacementCentreX']} Y:{fid['PlacementCentreY']}" for fid in
                               self.fid_list]
@@ -210,11 +224,7 @@ class App(ctk.CTk):
                 self.select_fid_entry2.configure(values=fid_values)
                 self.select_fid1.set(fid_values[0])
                 self.select_fid2.set(fid_values[1])
-            else:
-                self.are_fids = False
-                messagebox.showinfo("No Fiducials found",
-                                    f"No Fiducials found in {self.file_path.get()}. Please select manually")
-                self.create_fid_section()  # Update fiducial section dynamically
+
         except Exception as e:
             print(f"Error: {e}")
 
