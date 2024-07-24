@@ -107,15 +107,14 @@ class App(ctk.CTk):
 
         if self.file_selected:
             if self.are_fids:
-                self.add_fid_content()  # creates combobox for the fids in file
+                self.add_fid_combox()  # creates combobox for the fids in file
             else:
-                no_fid_label = ctk.CTkLabel(self.fid_frame, text="No Fiducials found. Please select manually:")
-                no_fid_label.grid(row=0, column=0, padx=5, pady=2.5)
+                self.add_fid_manual()   # creates manual entry for the fids
         else:
             no_fid_label = ctk.CTkLabel(self.fid_frame, text="No Fiducials found.")
-            no_fid_label.grid(row=0, column=0, padx=5, pady=2.5)
+            no_fid_label.grid(row=0, column=0, padx=15, pady=5, sticky="w")
 
-    def add_fid_content(self):
+    def add_fid_combox(self):
         self.fid_label = ctk.CTkLabel(self.fid_frame, text="Found fiducials:")
         self.fid_label.grid(row=0, column=0, padx=5, pady=2.5)
 
@@ -130,6 +129,45 @@ class App(ctk.CTk):
         self.select_fid_entry2 = ctk.CTkComboBox(self.fid_frame, variable=self.select_fid2, values=[],
                                                  state='readonly', width=175)
         self.select_fid_entry2.grid(row=2, column=1, padx=5, pady=2.5)
+
+    def add_fid_manual(self):
+
+        no_fid_label = ctk.CTkLabel(self.fid_frame, text="No Fiducials found. Please select manually:")
+        no_fid_label.grid(row=0, column=0, padx=10, pady=2.5, sticky="w")
+
+        # Frame for Fiducial 1
+        fid1_frame = ctk.CTkFrame(self.fid_frame)
+        fid1_frame.grid(row=1, column=0, padx=5, pady=2.5, sticky="w")
+
+        self.no_fid1_label = ctk.CTkLabel(fid1_frame, text="Fiducial 1: ")
+        self.no_fid1_label.pack(side="left", padx=10, pady=5)
+
+        self.no_fid1_label_x = ctk.CTkLabel(fid1_frame, text="X: ")
+        self.no_fid1_label_x.pack(side="left", padx=5, pady=2.5)
+        self.no_fid1_label_x_entry = ctk.CTkEntry(fid1_frame, width=80)
+        self.no_fid1_label_x_entry.pack(side="left", padx=5, pady=2.5)
+
+        self.no_fid1_label_y = ctk.CTkLabel(fid1_frame, text="Y: ")
+        self.no_fid1_label_y.pack(side="left", padx=5, pady=2.5)
+        self.no_fid1_label_y_entry = ctk.CTkEntry(fid1_frame, width=80)
+        self.no_fid1_label_y_entry.pack(side="left", padx=5, pady=2.5)
+
+        # Frame for Fiducial 2
+        fid2_frame = ctk.CTkFrame(self.fid_frame)
+        fid2_frame.grid(row=2, column=0, padx=5, pady=2.5, sticky="w")
+
+        self.no_fid2_label = ctk.CTkLabel(fid2_frame, text="Fiducial 2: ")
+        self.no_fid2_label.pack(side="left", padx=10, pady=5)
+
+        self.no_fid2_label_x = ctk.CTkLabel(fid2_frame, text="X: ")
+        self.no_fid2_label_x.pack(side="left", padx=5, pady=2.5)
+        self.no_fid2_label_x_entry = ctk.CTkEntry(fid2_frame, width=80)
+        self.no_fid2_label_x_entry.pack(side="left", padx=5, pady=2.5)
+
+        self.no_fid2_label_y = ctk.CTkLabel(fid2_frame, text="Y: ")
+        self.no_fid2_label_y.pack(side="left", padx=5, pady=2.5)
+        self.no_fid2_label_y_entry = ctk.CTkEntry(fid2_frame, width=80)
+        self.no_fid2_label_y_entry.pack(side="left", padx=5, pady=2.5)
 
     def create_board_section(self):
         # BOARD SECTION
