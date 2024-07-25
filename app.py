@@ -38,13 +38,20 @@ class App(ctk.CTk):
         self.array_offset_x = ctk.DoubleVar(value=0.0)
         self.array_offset_y = ctk.DoubleVar(value=0.0)
 
+        #only for manual fids
+        self.manual_fid1_x = ctk.DoubleVar(value=0.0)
+        self.manual_fid1_y = ctk.DoubleVar(value=0.0)
+        self.manual_fid2_x = ctk.DoubleVar(value=0.0)
+        self.manual_fid2_y = ctk.DoubleVar(value=0.0)
+
         # States variables
         self.are_fids = False
         self.file_selected = False
 
         # Placement variables
         self.placements_list = []
-        self.fid_list = []
+        self.fid_list = [] #only for the combobox
+
         self.components_list = []
 
     def clear_ui(self):
@@ -144,12 +151,12 @@ class App(ctk.CTk):
 
         self.no_fid1_label_x = ctk.CTkLabel(fid1_frame, text="X: ")
         self.no_fid1_label_x.pack(side="left", padx=5, pady=2.5)
-        self.no_fid1_label_x_entry = ctk.CTkEntry(fid1_frame, width=80)
+        self.no_fid1_label_x_entry = ctk.CTkEntry(fid1_frame, textvariable=self.manual_fid1_x ,width=80)
         self.no_fid1_label_x_entry.pack(side="left", padx=5, pady=2.5)
 
         self.no_fid1_label_y = ctk.CTkLabel(fid1_frame, text="Y: ")
         self.no_fid1_label_y.pack(side="left", padx=5, pady=2.5)
-        self.no_fid1_label_y_entry = ctk.CTkEntry(fid1_frame, width=80)
+        self.no_fid1_label_y_entry = ctk.CTkEntry(fid1_frame, textvariable=self.manual_fid1_y, width=80)
         self.no_fid1_label_y_entry.pack(side="left", padx=5, pady=2.5)
 
         # Frame for Fiducial 2
@@ -161,12 +168,12 @@ class App(ctk.CTk):
 
         self.no_fid2_label_x = ctk.CTkLabel(fid2_frame, text="X: ")
         self.no_fid2_label_x.pack(side="left", padx=5, pady=2.5)
-        self.no_fid2_label_x_entry = ctk.CTkEntry(fid2_frame, width=80)
+        self.no_fid2_label_x_entry = ctk.CTkEntry(fid2_frame, textvariable=self.manual_fid2_x, width=80)
         self.no_fid2_label_x_entry.pack(side="left", padx=5, pady=2.5)
 
         self.no_fid2_label_y = ctk.CTkLabel(fid2_frame, text="Y: ")
         self.no_fid2_label_y.pack(side="left", padx=5, pady=2.5)
-        self.no_fid2_label_y_entry = ctk.CTkEntry(fid2_frame, width=80)
+        self.no_fid2_label_y_entry = ctk.CTkEntry(fid2_frame, textvariable=self.manual_fid2_y, width=80)
         self.no_fid2_label_y_entry.pack(side="left", padx=5, pady=2.5)
 
     def create_board_section(self):
@@ -241,7 +248,6 @@ class App(ctk.CTk):
             if unique_components:
                 self.select_diode_menu.configure(values=unique_components)
                 self.select_diode.set(unique_components[0])
-
             if len(self.fid_list) >= 2:
                 self.are_fids = True
             else:
@@ -355,12 +361,19 @@ class App(ctk.CTk):
                 'z': self.pcb_size_z.get(),
                 'margin': self.pcb_margin.get()
             }
-            fid1 = re.sub(r'[XY]:', '', self.select_fid1.get()[4:]).split(' ')
-            fid2 = re.sub(r'[XY]:', '', self.select_fid2.get()[4:]).split(' ')
-            fiducials = [
-                {'name': self.select_fid1.get()[:4], 'x': fid1[1], 'y': fid1[2]},
-                {'name': self.select_fid2.get()[:4], 'x': fid2[1], 'y': fid2[2]}
-            ]
+            if self.are_fids:
+                fid1 = re.sub(r'[XY]:', '', self.select_fid1.get()[4:]).split(' ')
+                fid2 = re.sub(r'[XY]:', '', self.select_fid2.get()[4:]).split(' ')
+                fiducials = [
+                    {'name': self.select_fid1.get()[:4], 'x': fid1[1], 'y': fid1[2]},
+                    {'name': self.select_fid2.get()[:4], 'x': fid2[1], 'y': fid2[2]}
+                ]
+            else:
+                fiducials = [
+                    {'name': "FID1", "x": self.manual_fid1_x.get(), "y": self.manual_fid1_y.get()},
+                    {'name': "FID2", "x": self.manual_fid2_x.get(), "y": self.manual_fid2_y.get()}
+                ]
+            print(fiducials)
             self._update_progress(0.5)
 
             array = {

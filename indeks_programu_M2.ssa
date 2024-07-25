@@ -4,18 +4,19 @@
 Unit System = MILIMETER
 Coordinate = LOWER LEFT
 Rotation = 0
-Placement Origin = -210.0, 5.0 
+Placement Origin = -10.0, 10.0 
 Fiducial = CIRCLE, 8.0, 8.0, 200.0, 200.0
 Accept Mark = NONE, 0, 0
 Bad Mark = NONE, 0, 0
 
 [BOARD]
 Board Name = indeks_programu_M2
-PCB Size = 210.0, 560.4, 3.000
-Array = 1, 10, LOWER RIGHT
-Array Offset = 0.0, 30.0
+PCB Size = 10.0, 10.4, 3.000
+Array = 10, 10, LOWER RIGHT
+Array Offset = 10.0, 10.0
 
 [PLACEMENTS]
 "U1" 83.91 14.93 0.000 0 NONE 0 0 0 0 4286 0 "110LD422" "" ""
 "U2" 67.49 15.07 0.000 180 NONE 0 0 0 0 4286 0 "110LD422" "" ""
 "U3" 476.09 15.07 0.000 180 NONE 0 0 0 0 4286 0 "110LD422" "" ""
+"D6" 110 110 0.000 270 NONE 0 0 0 0 4286 0 "WSLD713" "" ""
