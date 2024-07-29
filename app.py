@@ -92,7 +92,7 @@ class App(ctk.CTk):
         pcb_frame.grid(row=2, column=0, pady=10, padx=5, sticky="ew")
         pcb_margin_label = ctk.CTkLabel(pcb_frame, text="PCB Margin (mm)")
         pcb_margin_label.grid(row=0, column=0, padx=10, pady=(5, 2.5))
-        pcb_margin_entry = ctk.CTkEntry(pcb_frame, textvariable=self.pcb_margin, validate="focusout",
+        pcb_margin_entry = ctk.CTkEntry(pcb_frame, textvariable=self.pcb_margin, validate="key",
                                         validatecommand=(self.root.register(self.validate_float), '%P'), width=175)
         pcb_margin_entry.grid(row=0, column=1, padx=10, pady=(5, 2.5))
 
@@ -151,12 +151,16 @@ class App(ctk.CTk):
 
         self.no_fid1_label_x = ctk.CTkLabel(fid1_frame, text="X: ")
         self.no_fid1_label_x.pack(side="left", padx=5, pady=2.5)
-        self.no_fid1_label_x_entry = ctk.CTkEntry(fid1_frame, textvariable=self.manual_fid1_x ,width=80)
+        self.no_fid1_label_x_entry = ctk.CTkEntry(fid1_frame, textvariable=self.manual_fid1_x, validate="key",
+                                                  validatecommand=(self.root.register(self.validate_float), '%P'),
+                                                  width=80)
         self.no_fid1_label_x_entry.pack(side="left", padx=5, pady=2.5)
 
         self.no_fid1_label_y = ctk.CTkLabel(fid1_frame, text="Y: ")
         self.no_fid1_label_y.pack(side="left", padx=5, pady=2.5)
-        self.no_fid1_label_y_entry = ctk.CTkEntry(fid1_frame, textvariable=self.manual_fid1_y, width=80)
+        self.no_fid1_label_y_entry = ctk.CTkEntry(fid1_frame, textvariable=self.manual_fid1_y, validate="key",
+                                                  validatecommand=(self.root.register(self.validate_float), '%P'),
+                                                  width=80)
         self.no_fid1_label_y_entry.pack(side="left", padx=5, pady=2.5)
 
         # Frame for Fiducial 2
@@ -168,12 +172,16 @@ class App(ctk.CTk):
 
         self.no_fid2_label_x = ctk.CTkLabel(fid2_frame, text="X: ")
         self.no_fid2_label_x.pack(side="left", padx=5, pady=2.5)
-        self.no_fid2_label_x_entry = ctk.CTkEntry(fid2_frame, textvariable=self.manual_fid2_x, width=80)
+        self.no_fid2_label_x_entry = ctk.CTkEntry(fid2_frame, textvariable=self.manual_fid2_x, validate="key",
+                                                  validatecommand=(self.root.register(self.validate_float), '%P'),
+                                                  width=80)
         self.no_fid2_label_x_entry.pack(side="left", padx=5, pady=2.5)
 
         self.no_fid2_label_y = ctk.CTkLabel(fid2_frame, text="Y: ")
         self.no_fid2_label_y.pack(side="left", padx=5, pady=2.5)
-        self.no_fid2_label_y_entry = ctk.CTkEntry(fid2_frame, textvariable=self.manual_fid2_y, width=80)
+        self.no_fid2_label_y_entry = ctk.CTkEntry(fid2_frame, textvariable=self.manual_fid2_y, validate="key",
+                                                  validatecommand=(self.root.register(self.validate_float), '%P'),
+                                                  width=80)
         self.no_fid2_label_y_entry.pack(side="left", padx=5, pady=2.5)
 
     def create_board_section(self):
@@ -182,17 +190,17 @@ class App(ctk.CTk):
         board_frame.grid(row=4, column=0, pady=10, padx=5, sticky="ew")
         pcb_size_x_label = ctk.CTkLabel(board_frame, text="X Size")
         pcb_size_x_label.grid(row=0, column=0, padx=10, pady=(5, 2.5))
-        pcb_size_x_entry = ctk.CTkEntry(board_frame, textvariable=self.pcb_size_x, validate="focusout",
+        pcb_size_x_entry = ctk.CTkEntry(board_frame, textvariable=self.pcb_size_x, validate="key",
                                         validatecommand=(self.root.register(self.validate_float), '%P'))
         pcb_size_x_entry.grid(row=0, column=1, padx=10, pady=2.5)
         pcb_size_y_label = ctk.CTkLabel(board_frame, text="Y Size")
         pcb_size_y_label.grid(row=1, column=0, padx=10, pady=2.5)
-        pcb_size_y_entry = ctk.CTkEntry(board_frame, textvariable=self.pcb_size_y, validate="focusout",
+        pcb_size_y_entry = ctk.CTkEntry(board_frame, textvariable=self.pcb_size_y, validate="key",
                                         validatecommand=(self.root.register(self.validate_float), '%P'))
         pcb_size_y_entry.grid(row=1, column=1, padx=10, pady=2.5)
         pcb_size_z_label = ctk.CTkLabel(board_frame, text="Z Size")
         pcb_size_z_label.grid(row=2, column=0, padx=10, pady=2.5)
-        pcb_size_z_entry = ctk.CTkEntry(board_frame, textvariable=self.pcb_size_z, validate="focusout",
+        pcb_size_z_entry = ctk.CTkEntry(board_frame, textvariable=self.pcb_size_z, validate="key",
                                         validatecommand=(self.root.register(self.validate_float), '%P'))
         pcb_size_z_entry.grid(row=2, column=1, padx=10, pady=(2.5, 5))
 
@@ -202,12 +210,12 @@ class App(ctk.CTk):
         array_frame.grid(row=5, column=0, pady=5, padx=5, sticky="ew")
         array_columns_label = ctk.CTkLabel(array_frame, text="Columns")
         array_columns_label.grid(row=0, column=0, padx=5, pady=2.5)
-        array_columns_entry = ctk.CTkEntry(array_frame, textvariable=self.array_columns, validate="focusout",
+        array_columns_entry = ctk.CTkEntry(array_frame, textvariable=self.array_columns, validate="key",
                                            validatecommand=(self.root.register(self.validate_int), '%P'))
         array_columns_entry.grid(row=0, column=1, padx=5, pady=2.5)
         array_rows_label = ctk.CTkLabel(array_frame, text="Rows")
         array_rows_label.grid(row=1, column=0, padx=5, pady=2.5)
-        array_rows_entry = ctk.CTkEntry(array_frame, textvariable=self.array_rows, validate="focusout",
+        array_rows_entry = ctk.CTkEntry(array_frame, textvariable=self.array_rows, validate="key",
                                         validatecommand=(self.root.register(self.validate_int), '%P'))
         array_rows_entry.grid(row=1, column=1, padx=5, pady=2.5)
 
@@ -215,12 +223,12 @@ class App(ctk.CTk):
         array_offset_frame.grid(row=6, column=0, pady=5, padx=5, sticky="ew")
         offset_x_label = ctk.CTkLabel(array_offset_frame, text="Array Offset X")
         offset_x_label.grid(row=0, column=0, padx=5, pady=2.5)
-        offset_x_entry = ctk.CTkEntry(array_offset_frame, textvariable=self.array_offset_x, validate="focusout",
+        offset_x_entry = ctk.CTkEntry(array_offset_frame, textvariable=self.array_offset_x, validate="key",
                                       validatecommand=(self.root.register(self.validate_float), '%P'))
         offset_x_entry.grid(row=0, column=1, padx=5, pady=2.5)
         offset_y_label = ctk.CTkLabel(array_offset_frame, text="Array Offset Y")
         offset_y_label.grid(row=1, column=0, padx=5, pady=2.5)
-        offset_y_entry = ctk.CTkEntry(array_offset_frame, textvariable=self.array_offset_y, validate="focusout",
+        offset_y_entry = ctk.CTkEntry(array_offset_frame, textvariable=self.array_offset_y, validate="key",
                                       validatecommand=(self.root.register(self.validate_float), '%P'))
         offset_y_entry.grid(row=1, column=1, padx=5, pady=2.5)
 
@@ -373,7 +381,6 @@ class App(ctk.CTk):
                     {'name': "FID1", "x": self.manual_fid1_x.get(), "y": self.manual_fid1_y.get()},
                     {'name': "FID2", "x": self.manual_fid2_x.get(), "y": self.manual_fid2_y.get()}
                 ]
-            print(fiducials)
             self._update_progress(0.5)
 
             array = {
